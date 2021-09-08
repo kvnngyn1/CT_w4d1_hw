@@ -15,9 +15,12 @@ ORDER BY amount;
 
 -- 3. What film does the store have the most of? 
 -- (search inventory)
-SELECT film.title, inventory.film_id, inventory.store_id
+SELECT film.title, COUNT(inventory.film_id)
 FROM inventory
-JOIN film ON inventory.film_id = film.film_id;
+JOIN film ON inventory.film_id = film.film_id
+GROUP BY inventory.film_id, film.title
+ORDER BY COUNT(inventory.film_id)
+DESC;
 
 -- 4. How many customers have the last name 'William'?
 -- There is no customers with a last name of william, BUT
@@ -27,15 +30,16 @@ FROM customer
 WHERE last_name like 'William%';
 
 -- 5. What store employee (get the id) sold the most rentals?
-SELECT staff.staff_id, staff.username, payment.rental_id, payment.amount
+SELECT staff.staff_id, staff.username, sum( payment.amount)
 FROM staff
 JOIN payment ON staff.staff_id = payment.staff_id
-WHERE
+GROUP BY staff.staff_id, staff.username
+
 
 -- 6. How many different district names are there?
 -- keyword = DIFFERENT
 -- 603 all together and 378 with no repeats
-SELECT DISTINCT district
+SELECT COUNT(DISTINCT district)
 FROM address;
 
 -- 7 What film has the most actors in it? 
@@ -55,11 +59,15 @@ WHERE last_name like '%es';
 -- 9. How many payment amounts(4.99,5.99, etc.) had a number of 
 -- rentals above 250 for customers with ids between 380 and 430? 
 -- (use group by having >250)
-SELECT payment.customer_id, payment.amount, rental.rental_id, rental.inventory_id
+
+SELECT payment.amount, COUNT(rental.rental_id) AS rental_count
 FROM payment
 JOIN rental ON payment.customer_id = rental.customer_id
-WHERE payment.customer_id > 380 and payment.customer_id < 430;
--- GROUP BY having > 250
+WHERE payment.customer_id > 380 and payment.customer_id < 430
+GROUP BY payment.amount
+HAVING COUNT(rental.rental_id) > 250
+ORDER BY rental_count DESC;
+
 
 
 -- 10. Within the film table, how many rating categories are 
